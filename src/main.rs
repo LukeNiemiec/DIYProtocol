@@ -1,10 +1,14 @@
 pub mod packet;
 pub mod datalink_packet;
+pub mod network_packet;
+pub mod transport_packet;
 
 use pnet::datalink::{self};
 use pnet::datalink::Channel::Ethernet;
 
 use crate::packet::Packet;
+
+use crate::transport_packet::Transport;
 
 fn _print_type<T>(_: &T) {
 	println!("{}", std::any::type_name::<T>());
@@ -28,17 +32,22 @@ fn main() {
 			Ok(packet) => {
 				
 				let mut pack = Packet::default();
-				pack.packet = packet.to_vec();
+				pack.packet.init(packet.to_vec());
 
-				println!("{:?}", pack.packet);
+				// println!("\n\n{:?}\n\n", packet);
 				
 				pack.parse();
-				pack.datalink.unwrap().print();
 				
-				break 'main;
-			}
-			
-			Err(e) => println!("error: {:?}", e)
+				match pack.transport {
+					Some(_) => {
+						pack.print();
+						break 'main;
+					},
+					None => (),
+				}
+			}, 
+
+			Err(e) => panic!("ERROR: {:?}", e),
 		}
 	}
 	
