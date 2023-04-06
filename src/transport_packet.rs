@@ -1,6 +1,10 @@
 use crate::packet::PacketPointer;
 use crate::packet::ByteOperations;
 
+use crate::application_packet::Application;
+use crate::application_packet::Diy;
+
+
 #[derive(Debug, PartialEq)]
 pub enum Transport {
 	Tcp(Tcp),
@@ -14,14 +18,27 @@ impl Transport {
 				},
 			}
 		}
-	
-		pub fn print(&self) {
-			match self {
-				Transport::Tcp (tran_pack) => {
-					tran_pack.print()
-				},
+
+	pub fn get_next_proto(&self) -> Option<Application> {
+		let proto = match self {
+			Transport::Tcp(tran_pack) => {
+				tran_pack.get_dest()
 			}
+		};
+
+		match proto {
+			1212 => Some(Application::Diy(Diy::default())), //number for DIY protocol
+			_ => None,
 		}
+	}
+	
+	pub fn print(&self) {
+		match self {
+			Transport::Tcp (tran_pack) => {
+				tran_pack.print()
+			},
+		}
+	}
 }
 
 
@@ -71,10 +88,6 @@ impl Tcp {
 		println!("\n\nTRANSPORT:");
 		println!("SOURCE PORT: {:?}", self.get_src());
 	 	println!("DESTINATION PORT: {:?}", self.get_dest());
-		// println!(": {}", self);
-		// println!(": {}", self);
-		// println!(": {}", self);
-		// println!(": {}", self);
 	}
 }
 

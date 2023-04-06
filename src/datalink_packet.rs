@@ -4,6 +4,7 @@ use crate::packet::ByteOperations;
 use crate::network_packet::Network;
 use crate::network_packet::IPv4;
 
+
 #[derive(Debug, PartialEq)]
 pub enum Datalink {
 	EthernetII(EthernetII),
@@ -38,6 +39,7 @@ impl Datalink {
 	}
 	
 }
+
 
 #[derive(Debug, PartialEq)]
 pub struct EthernetII {

@@ -4,6 +4,7 @@ use crate::packet::ByteOperations;
 use crate::transport_packet::Transport;
 use crate::transport_packet::Tcp;
 
+
 #[derive(Debug, PartialEq)]
 pub enum Network {
 	IPv4(IPv4),
@@ -19,7 +20,6 @@ impl Network {
 	}
 
 	pub fn get_next_proto(&self) -> Option<Transport> {
-		
 		let proto = match self {
 			Network::IPv4 (net_pack) => {
 				net_pack.get_proto()
@@ -27,9 +27,7 @@ impl Network {
 		};
 		
 		match proto {
-			6 => {
-				Some(Transport::Tcp(Tcp::default()))
-			},
+			6 => Some(Transport::Tcp(Tcp::default())),
 			_ => None,
 		}
 	}
@@ -42,6 +40,7 @@ impl Network {
 		}
 	}
 }
+
 
 #[derive(Debug, PartialEq)]
 pub struct IPv4 {
@@ -59,8 +58,6 @@ pub struct IPv4 {
 	pub destination_addr: Vec<u8>, 
 	pub options: Vec<u8>,   
 }
-
-
 
 impl Default for IPv4 {
 	fn default() -> Self {

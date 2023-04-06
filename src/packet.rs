@@ -7,6 +7,9 @@ use crate::network_packet::IPv4;
 use crate::transport_packet::Transport;
 use crate::transport_packet::Tcp;
 
+use crate::application_packet::Application;
+use crate::application_packet::Diy;
+
 pub trait ByteOperations {
 	fn split_u8(c: u8, index: u8) -> (u8, u8) {
 		(c >> index,  c & (8 - index).pow(2) - 1)	
@@ -22,8 +25,6 @@ pub trait ByteOperations {
 }
 
 impl ByteOperations for u8 {}
-impl ByteOperations for u16 {}
-
 
 #[derive(Debug)]
 pub struct PacketPointer(Vec<u8>);
@@ -60,7 +61,7 @@ pub struct Packet {
 	pub datalink: Option<Datalink>,
 	pub network: Option<Network>,
 	pub transport: Option<Transport>,
-	
+	pub application: Option<Application>,
 }
 
 impl Packet {
@@ -79,6 +80,10 @@ impl Packet {
 
 			if self.network != None {
 				self.transport = self.parse_transport();
+
+				if self.transport != None {
+					self.application = self.parse_application();
+				}
 			}
 		}
 	}
@@ -121,6 +126,21 @@ impl Packet {
 			None => None,
 		}
 	}
+
+	pub fn parse_application(&mut self) -> Option<Application> {
+		let ap = self.transport.as_ref().unwrap();
+		
+		match ap.get_next_proto() {
+			Some(mut application) => {
+
+				application.parse(&mut self.packet);
+				
+				Some(application)
+			}, 
+			None => None,
+		}
+	}
+	
 }
 
 impl Default for Packet {
@@ -130,6 +150,7 @@ impl Default for Packet {
 			datalink: None,
 			network: None,
 			transport: None,
+			application: None,
 		}
 	}
 }

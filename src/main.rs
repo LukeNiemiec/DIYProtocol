@@ -2,6 +2,7 @@ pub mod packet;
 pub mod datalink_packet;
 pub mod network_packet;
 pub mod transport_packet;
+pub mod application_packet;
 
 use pnet::datalink::{self};
 use pnet::datalink::Channel::Ethernet;
@@ -38,7 +39,7 @@ fn main() {
 				
 				pack.parse();
 				
-				match pack.transport {
+				match pack.application {
 					Some(_) => {
 						pack.print();
 						break 'main;
