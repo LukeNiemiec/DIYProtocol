@@ -12,9 +12,13 @@ pub trait ByteOperations {
 		(c >> index,  c & (8 - index).pow(2) - 1)	
 	}
 
-	fn concat(a: u8, b: u8) -> u16 {
-		((a as u16) >> 8) | (b as u16)
+	fn concat_u8(a: u8, b: u8) -> u16 {
+		((a as u16) << 8) | (b as u16)
 	} 
+
+	fn concat_u16(a: u16, b: u16) -> u32 {
+		((a as u32) << 16) | (b as u32)
+	}
 }
 
 impl ByteOperations for u8 {}

@@ -1,4 +1,5 @@
 use crate::packet::PacketPointer;
+use crate::packet::ByteOperations;
 
 use crate::transport_packet::Transport;
 use crate::transport_packet::Tcp;
@@ -113,12 +114,12 @@ impl IPv4 {
 
 	pub fn print(&self) {
 		println!("\n\nNETWORK: {:?}", self)
-		println!(": {}", self);
-		println!(": {}", self);
-		println!(": {}", self);
-		println!(": {}", self);
-		println!(": {}", self);
-		println!(": {}", self);
+		// println!(": {}", self);
+		// println!(": {}", self);
+		// println!(": {}", self);
+		// println!(": {}", self);
+		// println!(": {}", self);
+		// println!(": {}", self);
 
 	}
 }

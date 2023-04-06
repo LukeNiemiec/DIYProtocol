@@ -1,5 +1,5 @@
 use crate::packet::PacketPointer;
-
+use crate::packet::ByteOperations;
 
 #[derive(Debug, PartialEq)]
 pub enum Transport {
@@ -59,11 +59,18 @@ impl Tcp {
 			println!("\n\nTCP has options\n");
 		}
 	}
+
+	pub fn get_src(&self) -> u16 {
+		<u8>::concat_u8(self.source_port[0], self.source_port[1])
+	}
+	pub fn get_dest(&self) -> u16 {
+		<u8>::concat_u8(self.destination_port[0], self.destination_port[1])
+	}
 	
 	pub fn print(&self) {
-		println!("\n\nTRANSPORT: {:?}", self);
-		// println!(": {:?}", self.source_port.);
-		// println!(": {}", self);
+		println!("\n\nTRANSPORT:");
+		println!("SOURCE PORT: {:?}", self.get_src());
+	 	println!("DESTINATION PORT: {:?}", self.get_dest());
 		// println!(": {}", self);
 		// println!(": {}", self);
 		// println!(": {}", self);
