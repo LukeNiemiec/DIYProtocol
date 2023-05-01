@@ -1,56 +1,58 @@
-pub mod packet;
-pub mod datalink_packet;
-pub mod network_packet;
-pub mod transport_packet;
-pub mod application_packet;
+pub mod utils;
+pub mod packets;
+pub mod sender_packet;
+pub mod reciever_packet;
+pub mod network;
 
 use pnet::datalink::{self};
 use pnet::datalink::Channel::Ethernet;
 
-use crate::packet::Packet;
+use std::net::{IpAddr, Ipv4Addr};
 
-use crate::transport_packet::Transport;
+use crate::network::NetworkConnection;
 
-fn _print_type<T>(_: &T) {
-	println!("{}", std::any::type_name::<T>());
-}
 
 fn main() {
+	let interfaces = datalink::interfaces();
 
-	let interface = datalink::interfaces();
-	println!("\ncurrent interface: {:?}\n", &interface[1].name);  
+	let interface = interfaces[1].clone();
 
-	let (mut _dt, mut dr) = match datalink::channel(&interface[1], Default::default()) {
-		Ok(Ethernet(_dt, dr)) => (_dt, dr),
+	
+	let source_ip = match &interface.ips[0].ip() {
+		IpAddr::V4(v4_addr) => {v4_addr.octets().to_vec()},
+		_ => todo!(),
+		
+		// IpAddr::V6(v6_addr) => {v6_addr.octets()},
+	};
+
+	let dest_ip = source_ip.clone();
+
+
+	let source_mac = match &interface.mac {
+		Some(addr) => addr.octets().to_vec(),
+		None => vec![],
+	};
+
+	let dest_mac = source_mac.clone();
+
+
+	let (transmiter, reciever) = match datalink::channel(&interface, Default::default()) {
+		Ok(Ethernet(dt, dr)) => (dt, dr),
 		Ok(_) => panic!("something is very wrong if this shows up!"),
 		Err(e) => panic!("error: {:?}", e)
 	};
-	        
-
-
-	'main: loop {
-		match dr.next() {
-			Ok(packet) => {
-				
-				let mut pack = Packet::default();
-				pack.packet.init(packet.to_vec());
-
-				// println!("\n\n{:?}\n\n", packet);
-				
-				pack.parse();
-				
-				match pack.application {
-					Some(_) => {
-						pack.print();
-						break 'main;
-					},
-					None => (),
-				}
-			}, 
-
-			Err(e) => panic!("ERROR: {:?}", e),
-		}
-	}
 	
-	 
+	
+	let network = NetworkConnection {
+		interface,
+		transmiter,
+		reciever,
+		source_ip,
+		dest_ip,
+		source_mac,
+		dest_mac,
+		length: vec![0,0],
+	};
+
+	network.send_packet()
 }

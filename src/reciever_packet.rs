@@ -1,62 +1,21 @@
-use crate::datalink_packet::Datalink;
-use crate::datalink_packet::EthernetII;
+use crate::packets::datalink_packet::Datalink;
+use crate::packets::datalink_packet::EthernetII;
 
-use crate::network_packet::Network;
-use crate::network_packet::IPv4;
+use crate::packets::network_packet::Network;
+use crate::packets::network_packet::IPv4;
 
-use crate::transport_packet::Transport;
-use crate::transport_packet::Tcp;
+use crate::packets::transport_packet::Transport;
+use crate::packets::transport_packet::Tcp;
 
-use crate::application_packet::Application;
-use crate::application_packet::Diy;
+use crate::packets::application_packet::Application;
+use crate::packets::application_packet::Diy;
 
-pub trait ByteOperations {
-	fn split_u8(c: u8, index: u8) -> (u8, u8) {
-		(c >> index,  c & (8 - index).pow(2) - 1)	
-	}
-
-	fn concat_u8(a: u8, b: u8) -> u16 {
-		((a as u16) << 8) | (b as u16)
-	} 
-
-	fn concat_u16(a: u16, b: u16) -> u32 {
-		((a as u32) << 16) | (b as u32)
-	}
-}
-
-impl ByteOperations for u8 {}
-
-#[derive(Debug)]
-pub struct PacketPointer(Vec<u8>);
-
-impl PacketPointer {
-	pub fn read(&mut self, bytes: f32) -> Vec<u8> {
-		let mut read: Vec<u8> =  vec![];
-		let index = bytes.floor() as usize;
-
-		read.append(&mut self.0[0..index].to_vec());
-		self.0 = self.0.split_off(index);
-		
-		let remainder = ((bytes - bytes.floor()) * 10.0) as u8;	
-
-		if remainder != 0 {
-			let (x, y) = <u8>::split_u8(self.0[0], remainder);
-
-			self.0[0] = y;
-			read.push(x);
-		}
-
-		read
-	}
-
-	pub fn init(&mut self, packet: Vec<u8>) {
-		self.0 = packet;
-	}
-}
+use crate::utils::utils::ByteOperations;
+use crate::utils::utils::PacketPointer;
 
 
 #[derive(Debug)]
-pub struct Packet {
+pub struct PacketReciever {
 	pub packet: PacketPointer,
 	pub datalink: Option<Datalink>,
 	pub network: Option<Network>,
@@ -64,7 +23,7 @@ pub struct Packet {
 	pub application: Option<Application>,
 }
 
-impl Packet {
+impl PacketReciever {
 
 	pub fn print(self) {
 		self.datalink.unwrap().print();
@@ -140,12 +99,11 @@ impl Packet {
 			None => None,
 		}
 	}
-	
 }
 
-impl Default for Packet {
+impl Default for PacketReciever {
 	fn default() -> Self {
-		Packet {
+		PacketReciever {
 			packet: PacketPointer(vec![]),
 			datalink: None,
 			network: None,

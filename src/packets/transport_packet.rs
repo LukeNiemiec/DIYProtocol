@@ -1,8 +1,8 @@
-use crate::packet::PacketPointer;
-use crate::packet::ByteOperations;
+use crate::utils::utils::PacketPointer;
+use crate::utils::utils::ByteOperations;
 
-use crate::application_packet::Application;
-use crate::application_packet::Diy;
+use crate::packets::application_packet::Application;
+use crate::packets::application_packet::Diy;
 
 
 #[derive(Debug, PartialEq)]
@@ -12,12 +12,22 @@ pub enum Transport {
 
 impl Transport {
 	pub fn parse(&mut self, packet: &mut PacketPointer) {
-			match self {
-				Transport::Tcp (tran_pack) => {
-					tran_pack.parse(packet)
-				},
-			}
+		match self {
+			Transport::Tcp (tran_pack) => {
+				tran_pack.parse(packet)
+			},
 		}
+	}
+
+	pub fn build(&self) -> Vec<u8> {
+		match self {
+			Transport::Tcp (tran_pack) => {
+				Vec::<u8>::from(tran_pack)
+			},
+		}
+	}
+
+	
 
 	pub fn get_next_proto(&self) -> Option<Application> {
 		let proto = match self {
@@ -106,5 +116,29 @@ impl Default for Tcp {
 			pointer: vec![],
 			options: vec![],
 		}
+	}
+}
+
+
+impl From<&Tcp> for Vec<u8> {
+	fn from(item: &Tcp) -> Self {
+		let mut packet_bytes: Vec<u8> = vec![];
+		
+		packet_bytes.extend(&item.source_port);
+		packet_bytes.extend(&item.destination_port);
+		packet_bytes.extend(&item.sequence);
+		packet_bytes.extend(&item.acknowledgement);
+		
+		packet_bytes.extend(vec![
+			<u8>::concat_u4(item.offset[0], item.rsvd[0], 4),
+			item.flags[0],
+		]);
+		
+		packet_bytes.extend(&item.window);
+		packet_bytes.extend(&item.checksum);
+		packet_bytes.extend(&item.pointer);
+		packet_bytes.extend(&item.options);
+
+		packet_bytes
 	}
 }
